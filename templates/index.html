@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forest Fire Prediction System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      color: #1b5e20;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .header p {
+      font-size: 0.95rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .metrics {
+      background: #fff;
+      padding: 12px 16px;
+      border-radius: 6px;
+      border-left: 4px solid #1b5e20;
+      font-size: 0.9rem;
+      color: #555;
+      display: inline-block;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 25px;
+    }
+
+    .form-section h3 {
+      font-size: 1.1rem;
+      color: #1b5e20;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .quick-fills {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .quick-btn {
+      padding: 9px 14px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #333;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .quick-btn:hover {
+      background: #1b5e20;
+      color: white;
+      border-color: #1b5e20;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #1b5e20;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #1b5e20;
+      box-shadow: 0 0 0 2px rgba(27, 94, 32, 0.08);
+    }
+
+    .form-group .hint {
+      font-size: 0.75rem;
+      color: #999;
+      margin-top: 3px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: #1b5e20;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2e7d32;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background: #e8e8e8;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .result {
+      background: white;
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-top: 25px;
+      border-left: 4px solid #1b5e20;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    .result.danger {
+      border-left-color: #c62828;
+      background: #fff5f5;
+    }
+
+    .result.safe {
+      border-left-color: #1b5e20;
+      background: #f5fff5;
+    }
+
+    .result-message {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #333;
+      white-space: pre-line;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e0e0e0;
+      border-top-color: #1b5e20;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      margin-top: 12px;
+      color: #666;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 25px 20px;
+      color: #999;
+      font-size: 0.85rem;
+      border-top: 1px solid #ddd;
+      margin-top: 40px;
+    }
+
+    .footer a {
+      color: #1b5e20;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      text-align: left;
+      margin-bottom: 30px;
+    }
+
+    .footer-section h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-section p {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .footer-section ul {
+      list-style: none;
+    }
+
+    .footer-section li {
+      margin-bottom: 6px;
+    }
+
+    .footer-section a {
+      color: #1b5e20;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-section a:hover {
+      color: #2e7d32;
+      text-decoration: underline;
+    }
+
+    .footer-divider {
+      height: 1px;
+      background: #ddd;
+      margin: 20px 0;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .quick-fills {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Forest Fire Prediction</h1>
+      <p>Risk assessment based on environmental factors</p>
+      {% if metrics %}
+      <div class="metrics">
+        Model Accuracy (ROC-AUC): <strong>{{ "%.1f" | format(metrics.roc_auc * 100) }}%</strong>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <form id="predictionForm" method="POST" action="/predict">
+        <div class="form-section">
+          <h3>Quick Scenarios</h3>
+          <div class="quick-fills">
+            <button type="button" class="quick-btn" onclick="fillLowRisk()">Low Risk</button>
+            <button type="button" class="quick-btn" onclick="fillMediumRisk()">Medium Risk</button>
+            <button type="button" class="quick-btn" onclick="fillHighRisk()">High Risk</button>
+            <button type="button" class="quick-btn" onclick="fillSummerDry()">Summer Dry</button>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Environmental Data</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="ffmc">FFMC Index</label>
+              <input id="ffmc" name="FFMC" type="number" step="0.01" required>
+              <span class="hint">18.7 - 96.2</span>
+            </div>
+            <div class="form-group">
+              <label for="dmc">DMC Index</label>
+              <input id="dmc" name="DMC" type="number" step="0.1" required>
+              <span class="hint">1.1 - 291.3</span>
+            </div>
+            <div class="form-group">
+              <label for="dc">DC Index</label>
+              <input id="dc" name="DC" type="number" step="0.1" required>
+              <span class="hint">7.9 - 860.6</span>
+            </div>
+            <div class="form-group">
+              <label for="isi">ISI Index</label>
+              <input id="isi" name="ISI" type="number" step="0.01" required>
+              <span class="hint">0.0 - 56.1</span>
+            </div>
+            <div class="form-group">
+              <label for="temp">Temperature (°C)</label>
+              <input id="temp" name="Temperature" type="number" step="0.1" required>
+              <span class="hint">2.2 - 33.3</span>
+            </div>
+            <div class="form-group">
+              <label for="rh">Humidity (%)</label>
+              <input id="rh" name="RH%" type="number" step="0.1" required>
+              <span class="hint">15 - 100</span>
+            </div>
+            <div class="form-group">
+              <label for="wind">Wind (km/h)</label>
+              <input id="wind" name="Wind km/hr" type="number" step="0.01" required>
+              <span class="hint">0.4 - 9.4</span>
+            </div>
+            <div class="form-group">
+              <label for="rain">Rainfall (mm/m²)</label>
+              <input id="rain" name="Rain" type="number" step="0.01" required>
+              <span class="hint">0.0 - 6.4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn btn-primary">Analyze</button>
+          <button type="reset" class="btn btn-secondary">Clear</button>
+        </div>
+      </form>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Analyzing...</div>
+      </div>
+    </div>
+
+    {% if pred %}
+    <div class="result show {% if 'Danger' in pred %}danger{% else %}safe{% endif %}">
+      <div class="result-message">{{ pred }}</div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>About</h4>
+          <p>Machine learning system for assessing forest fire risk using FWI indices and environmental factors.</p>
+          <p style="font-size: 0.8rem; color: #999; margin-top: 8px;">Model Accuracy: ROC-AUC ~72%</p>
+        </div>
+
+        <div class="footer-section">
+          <h4>Model Info</h4>
+          <ul>
+            <li>Algorithm: Random Forest</li>
+            <li>Features: 8 environmental factors</li>
+            <li>Training set: 517 samples</li>
+            <li>Output: Fire probability score</li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="https://github.com/Sagnik220/Forest-Fire-Prediction" target="_blank">View on GitHub</a></li>
+            <li><a href="https://archive.ics.uci.edu/ml/datasets/forest+fires" target="_blank">Dataset Source</a></li>
+            <li><a href="https://www.linkedin.com/in/sagnik-mukherjee-23b21b16a/" target="_blank">Creator</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-divider"></div>
+
+      <div class="footer-bottom">
+        <p>Forest Fire Prediction System | Built with Python, Flask, and Scikit-learn</p>
+        <p style="margin-top: 6px;">2026 | Data-driven environmental protection</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('predictionForm');
+    const loading = document.getElementById('loading');
+
+    form.addEventListener('submit', function() {
+      loading.classList.add('active');
+    });
+
+    function fillLowRisk() {
+      document.getElementById('ffmc').value = '79.5';
+      document.getElementById('dmc').value = '25.6';
+      document.getElementById('dc').value = '80.5';
+      document.getElementById('isi').value = '2.5';
+      document.getElementById('temp').value = '15.2';
+      document.getElementById('rh').value = '65.5';
+      document.getElementById('wind').value = '2.8';
+      document.getElementById('rain').value = '0.2';
+    }
+
+    function fillMediumRisk() {
+      document.getElementById('ffmc').value = '86.2';
+      document.getElementById('dmc').value = '110.9';
+      document.getElementById('dc').value = '304.5';
+      document.getElementById('isi').value = '8.4';
+      document.getElementById('temp').value = '22.8';
+      document.getElementById('rh').value = '42.0';
+      document.getElementById('wind').value = '4.9';
+      document.getElementById('rain').value = '0.0';
+    }
+
+    function fillHighRisk() {
+      document.getElementById('ffmc').value = '92.5';
+      document.getElementById('dmc').value = '220.4';
+      document.getElementById('dc').value = '664.2';
+      document.getElementById('isi').value = '18.5';
+      document.getElementById('temp').value = '31.6';
+      document.getElementById('rh').value = '21.0';
+      document.getElementById('wind').value = '7.8';
+      document.getElementById('rain').value = '0.0';
+    }
+
+    function fillSummerDry() {
+      document.getElementById('ffmc').value = '90.1';
+      document.getElementById('dmc').value = '166.9';
+      document.getElementById('dc').value = '520.3';
+      document.getElementById('isi').value = '14.2';
+      document.getElementById('temp').value = '28.4';
+      document.getElementById('rh').value = '28.5';
+      document.getElementById('wind').value = '5.6';
+      document.getElementById('rain').value = '0.0';
+    }
+  </script>
+</body>
+</html>
+
