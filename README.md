@@ -1,3 +1,7 @@
+
+
+Read comments in the app.py[app.py] and also in readme[readme_temp.md]
+
 Forest Fire Prediction is a Flask application that serves a trained machine learning model to estimate the probability of a fire given eight environmental factors from the FWI system. The repository contains a reproducible training script, the saved model artifact, the web UI, and supporting assets. 
 
 The data source is the UCI Forest Fires dataset (forestfires.csv) with 517 rows. The binary target is defined as fire if area > 0, and the feature set includes FFMC, DMC, DC, ISI, temperature, relative humidity, wind speed, and rainfall. Data is split with stratification on the target to preserve class balance. 
